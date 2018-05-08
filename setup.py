@@ -34,7 +34,7 @@ setup(
     description='Project to calculate issue metrics for a github repository',
 
     # The project's main homepage.
-    url='https://github.com/p00j4/unit-test-workshop',
+    url='https://github.com/p00j4/unit-test-main',
 
     # Author details
     author='Akshay Goel',
@@ -92,7 +92,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'issue_analyzer = confengine.workshop.analyzer:main'
+            'issue_analyzer = metrique.main.analyzer:main'
         ],
     },
 )
