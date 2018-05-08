@@ -20,12 +20,12 @@ class IssueMetrics(object):
 
 
 class IssueAnalyzer(object):
-    def __init__(self, org, repo):
+    def __init__(self, org, repo, issue_metrics=None):
         self.org = org
         self.repo = repo
         self.gh = Github()
         self.gh_repo = self.gh.get_repo("%s/%s" % (self.org, self.repo))
-        self.issue_metrics = IssueMetrics()
+        self.issue_metrics = issue_metrics or IssueMetrics()
 
         # Temp Variables
         self.total_issue_closure_time = 0
