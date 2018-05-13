@@ -92,7 +92,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'issue_analyzer = metrique.main.analyzer:main'
+            'issue_analyzer = metrique.issue_analyzer:main'
         ],
     },
 )
