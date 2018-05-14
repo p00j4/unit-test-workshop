@@ -9,6 +9,10 @@ with open('VERSION', encoding='utf-8') as f:
 
 requires = [
     'pygithub==1.39'
+    # 'nose>=1.3.7',
+    # 'mock>=2.0.0',
+    # 'nose_parameterized==0.5.0',
+    # 'nosexcover==1.0.11'
 ]
 
 test_dependencies = [

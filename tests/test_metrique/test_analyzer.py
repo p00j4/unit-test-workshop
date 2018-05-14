@@ -83,18 +83,18 @@ class TestAnalyzer(TestCase):
         self.assertEqual(mock_metrics.closed_issues, 2)
         self.assertEqual(mock_metrics.total_issues, 12)
 
-    @patch("github.Github.get_repo")
-    def test_publish_metrics(self, repo):
-        # Return mock_repo
-        mock_repo = Mock()
-        repo.return_value = mock_repo
-
-        mock_repo.get_issues = get_mock_issues
-
-        # Call function under test
-        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
-
-        # Add asserts to validate
-        self.assertEqual(issue_metrics.open_issues, 2)
-        self.assertEqual(issue_metrics.closed_issues, 2)
-        self.assertEqual(issue_metrics.total_issues, 4)
+    # @patch("github.Github.get_repo")
+    # def test_publish_metrics(self, repo):
+    #     # Return mock_repo
+    #     mock_repo = Mock()
+    #     repo.return_value = mock_repo
+    #
+    #     mock_repo.get_issues = get_mock_issues
+    #
+    #     # Call function under test
+    #     issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+    #
+    #     # Add asserts to validate
+    #     self.assertEqual(issue_metrics.open_issues, 2)
+    #     self.assertEqual(issue_metrics.closed_issues, 2)
+    #     self.assertEqual(issue_metrics.total_issues, 4)

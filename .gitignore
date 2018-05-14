@@ -92,6 +92,10 @@ ENV/
 # Spyder project settings
 .spyderproject
 
+#code
+.noseids
+coverage*
+
 # Rope project settings
 .ropeproject
 
