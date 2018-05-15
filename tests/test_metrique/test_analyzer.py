@@ -1,9 +1,8 @@
 import datetime
 from unittest import TestCase
 
-from mock import Mock, MagicMock, patch
-
-from metrique.issue_analyzer import IssueAnalyzer, IssueMetrics
+from mock import Mock, patch, MagicMock
+from metrique.issue_analyzer import IssueAnalyzer
 
 
 class MockIssues(object):
@@ -14,6 +13,7 @@ class MockIssues(object):
         if state == "closed":
             mock.created_at = datetime.datetime.utcnow() - datetime.timedelta(days=7)
             mock.closed_at = mock.created_at + datetime.timedelta(days=2)
+        return mock
 
     @classmethod
     def get_mock_issues(cls, length, state):
@@ -69,10 +69,11 @@ class TestAnalyzer(TestCase):
     def test_update_issue_counters(self):
         mock_issue = Mock()
         mock_issue.state = "open"
-        mock_metrics = MagicMock(spec=IssueMetrics)
+        mock_metrics = Mock()
         mock_metrics.closed_issues = 1
         mock_metrics.open_issues = 1
         mock_metrics.total_issues = 10
+        mock_metrics.tt = 2
 
         IssueAnalyzer(self.org_name, self.repo_name).update_issue_counters(mock_issue, mock_metrics)
         self.assertEqual(mock_metrics.open_issues, 2)
@@ -83,18 +84,42 @@ class TestAnalyzer(TestCase):
         self.assertEqual(mock_metrics.closed_issues, 2)
         self.assertEqual(mock_metrics.total_issues, 12)
 
-    # @patch("github.Github.get_repo")
-    # def test_publish_metrics(self, repo):
-    #     # Return mock_repo
-    #     mock_repo = Mock()
-    #     repo.return_value = mock_repo
-    #
-    #     mock_repo.get_issues = get_mock_issues
-    #
-    #     # Call function under test
-    #     issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
-    #
-    #     # Add asserts to validate
-    #     self.assertEqual(issue_metrics.open_issues, 2)
-    #     self.assertEqual(issue_metrics.closed_issues, 2)
-    #     self.assertEqual(issue_metrics.total_issues, 4)
+    @patch("github.Github.get_repo")
+    def test_publish_metrics(self, repo):
+        # Return mock_repo
+        mock_repo = Mock()
+        repo.return_value = mock_repo
+
+        mock_repo.get_issues = get_mock_issues
+
+        # Call function under test
+        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+
+        # Add asserts to validate
+        self.assertEqual(issue_metrics.open_issues, 2)
+        self.assertEqual(issue_metrics.closed_issues, 2)
+        self.assertEqual(issue_metrics.total_issues, 4)
+
+    @patch("metrique.issue_analyzer.IssueAnalyzer.process_issue")
+    @patch("github.Github.get_repo")
+    def test_publish_metrics_exception(self, repo, mock_processor):
+        # Return mock_repo
+        mock_repo = Mock()
+        repo.return_value = mock_repo
+
+        mock_repo.get_issues = get_mock_issues
+
+        mock_processor.side_effect = [
+            mock_processor.real_method(),
+            mock_processor.real_method(),
+            mock_processor.real_method(),
+            Exception("Failed to process issue")
+        ]
+
+        # Call function under test
+        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+
+        # Add asserts to validate
+        self.assertEqual(issue_metrics.open_issues, 2)
+        self.assertEqual(issue_metrics.closed_issues, 1)
+        self.assertEqual(issue_metrics.total_issues, 3)

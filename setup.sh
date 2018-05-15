@@ -22,4 +22,4 @@ echo "************** PATH: "$VENV_PATH
 python setup.py install
 python setup.py test
 python `which nosetests` tests -s -vv  --with-xunit --with-xcover
-ls -lrt
+pwd
