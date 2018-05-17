@@ -123,3 +123,22 @@ class TestAnalyzer(TestCase):
         self.assertEqual(issue_metrics.open_issues, 2)
         self.assertEqual(issue_metrics.closed_issues, 1)
         self.assertEqual(issue_metrics.total_issues, 3)
+
+
+    @patch("github.Github.get_repo")
+    def test_publish_metrics_exception(self, repo):
+        # Return mock_repo
+        mock_repo = Mock()
+        repo.return_value = mock_repo
+
+        mock_issues = Mock()
+        mock_issues.side_effect = Exception("GITHUB API Unavailable")
+        mock_repo.get_issues = mock_issues
+
+        # Call function under test
+        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+
+        # Add asserts to validate
+        self.assertEqual(issue_metrics.open_issues, 2)
+        self.assertEqual(issue_metrics.closed_issues, 2)
+        self.assertEqual(issue_metrics.total_issues, 4)
