@@ -1,7 +1,9 @@
 import datetime
 from unittest import TestCase
 
-from mock import Mock, patch, MagicMock
+from github.GithubException import GithubException
+from mock import Mock, patch
+
 from metrique.issue_analyzer import IssueAnalyzer
 
 
@@ -44,6 +46,7 @@ class TestAnalyzer(TestCase):
     def setUp(self):
         self.org_name = "TestOrg"
         self.repo_name = "TestRepo"
+        self.analyzer = IssueAnalyzer(self.org_name, self.repo_name)
 
     def test_is_issue_closed_positive(self):
         mock_issue = Mock()
@@ -75,12 +78,12 @@ class TestAnalyzer(TestCase):
         mock_metrics.total_issues = 10
         mock_metrics.tt = 2
 
-        IssueAnalyzer(self.org_name, self.repo_name).update_issue_counters(mock_issue, mock_metrics)
+        self.analyzer.update_issue_counters(mock_issue, mock_metrics)
         self.assertEqual(mock_metrics.open_issues, 2)
         self.assertEqual(mock_metrics.total_issues, 11)
 
         mock_issue.state = "closed"
-        IssueAnalyzer(self.org_name, self.repo_name).update_issue_counters(mock_issue, mock_metrics)
+        self.analyzer.update_issue_counters(mock_issue, mock_metrics)
         self.assertEqual(mock_metrics.closed_issues, 2)
         self.assertEqual(mock_metrics.total_issues, 12)
 
@@ -93,50 +96,35 @@ class TestAnalyzer(TestCase):
         mock_repo.get_issues = get_mock_issues
 
         # Call function under test
-        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+        issue_metrics = self.analyzer.publish_metrics()
 
         # Add asserts to validate
         self.assertEqual(issue_metrics.open_issues, 2)
         self.assertEqual(issue_metrics.closed_issues, 2)
         self.assertEqual(issue_metrics.total_issues, 4)
 
-    @patch("metrique.issue_analyzer.IssueAnalyzer.process_issue")
-    @patch("github.Github.get_repo")
-    def test_publish_metrics_exception(self, repo, mock_processor):
-        # Return mock_repo
-        mock_repo = Mock()
-        repo.return_value = mock_repo
-
-        mock_repo.get_issues = get_mock_issues
-
-        mock_processor.side_effect = [
-            mock_processor.real_method(),
-            mock_processor.real_method(),
-            mock_processor.real_method(),
-            Exception("Failed to process issue")
-        ]
-
+    def test_publish_metrics_exception_none(self):
         # Call function under test
-        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
-
+        self.analyzer.gh_repo = None
+        issue_metrics = self.analyzer.publish_metrics()
+        # self.assertRaises(AttributeError, self.analyzer.publish_metrics)
         # Add asserts to validate
         self.assertEqual(issue_metrics.open_issues, 2)
-        self.assertEqual(issue_metrics.closed_issues, 1)
-        self.assertEqual(issue_metrics.total_issues, 3)
-
+        self.assertEqual(issue_metrics.closed_issues, 2)
+        self.assertEqual(issue_metrics.total_issues, 4)
 
     @patch("github.Github.get_repo")
-    def test_publish_metrics_exception(self, repo):
+    def test_publish_metrics_exception_github(self, repo):
         # Return mock_repo
         mock_repo = Mock()
         repo.return_value = mock_repo
 
         mock_issues = Mock()
-        mock_issues.side_effect = Exception("GITHUB API Unavailable")
+        mock_issues.side_effect = GithubException(404, "Not Found")
         mock_repo.get_issues = mock_issues
 
         # Call function under test
-        issue_metrics = IssueAnalyzer(self.org_name, self.repo_name).publish_metrics()
+        issue_metrics = self.analyzer.publish_metrics()
 
         # Add asserts to validate
         self.assertEqual(issue_metrics.open_issues, 2)
