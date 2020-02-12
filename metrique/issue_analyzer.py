@@ -4,6 +4,8 @@ from metrique.issue_metrics import IssueMetrics
 print "log 1"
 print "log 3 above 2"
 print "log 2"
+
+print "log 4"
 class IssueAnalyzer(object):
     def __init__(self, org, repo):
         self.org = org
