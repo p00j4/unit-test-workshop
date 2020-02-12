@@ -6,6 +6,7 @@ print "log 3 above 2"
 print "log 2"
 
 print "log 4"
+print "log 5"
 class IssueAnalyzer(object):
     def __init__(self, org, repo):
         self.org = org
