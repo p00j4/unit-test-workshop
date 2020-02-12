@@ -1,7 +1,7 @@
 from github import Github
 from metrique.issue_metrics import IssueMetrics
 
-
+print "log 1"
 class IssueAnalyzer(object):
     def __init__(self, org, repo):
         self.org = org
@@ -38,7 +38,8 @@ class IssueAnalyzer(object):
     def publish_metrics(self):
         issue_metrics = IssueMetrics()
         for issue in self.gh_repo.get_issues(state='all'):
-            print issue_metrics
+            print issue.title
+            #print issue_metrics
             self.process_issue(issue, issue_metrics)
         return issue_metrics
 
